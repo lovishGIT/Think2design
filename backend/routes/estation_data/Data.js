@@ -20,7 +20,7 @@ router.post("/create_estation", async (req, res) => {
         pincode,
       });
       const data = await stationinfo.save();
-      console.log(data);
+      
       return res
         .status(201)
         .json({ status: "success", message: "Data saved successfully" });
@@ -85,10 +85,9 @@ router.post("/draft_record/:id", async (req, res) => {
   const id = req.params.id;
   try {
     Stationinfo.findOne({ _id: id }, (err, data1) => {
-        console.log(data1.draft);
-        console.log(err)
+      
         Stationinfo.findByIdAndUpdate(id,{draft:!data1.draft}, (err, data) => {
-          console.log(data);
+         
           if (err) {
             res.json({ status: "error", message: "some error occured" });
           } else {
@@ -144,7 +143,6 @@ router.get("/get_station", async (req, res) => {
       if (err) {
         res.json({ status: "error", message: "some error occured" });
       } else {
-        console.log(data)
         res.json({ status: "success", data: data });
       }
     });

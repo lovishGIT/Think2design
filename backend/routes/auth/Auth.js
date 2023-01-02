@@ -3,6 +3,8 @@ const router = express.Router();
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const JWT_TOKEN = "IAMVIHAANSINGLA";
+const REFRESH_TOKEN = "IAMVIHU@";
+const fetchuser = require("../../middlewares/fetchuserdata")
 const User = require("../../models/Users");
 var nodemailer = require('nodemailer');
 
@@ -106,6 +108,14 @@ router.post("/login",async(req,res)=>{
 });
 
 //Register
+router.post("/checktoken", fetchuser, async (req, res) => {
+  console.log(req.user);
+  if (req.user.status === "error") {
+    res.send({ status: "error" });
+  } else {
+    res.send({ status: "success" });
+  }
+});
 
 router.post('/register',async(req,res)=>{
     
@@ -125,14 +135,35 @@ router.post('/register',async(req,res)=>{
         const flag = 0;
         const userdata = new User({firstname,lastname,email,password,city,state,pincode,flag,verification_code});
         await userdata.save();
+        console.log(userdata._id);
         // we need to show created when created which is 201
         // sendmail(verification_code,email);
-        return res.json({status:"success",message:"Data saved successfully"});
+        const data = {
+          user: {
+            id: userdata._id,
+            name: userdata.firstname,
+          },
+        };
+
+        const authtoken = jwt.sign(data, JWT_TOKEN);
+
+       
+
+        // res.cookie("tok__", refreshToken, {
+        //   maxAge: 24 * 60 * 60 * 1000,
+        //   httpOnly: true,
+        //   // secure: true
+        // });
+        return res.json({
+          status: "success",
+          authtoken: authtoken,
+          message:"Data saved successfully"
+        });
         }
     }
     catch(err){
         // it should show error status 400 when there is an error
-        return res.status(400).json({status:"error",message:"Some Internal Server Error"});
+        return res.json({status:"error",message:"Some Internal Server Error"});
     }
 })
 
